@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp-dev
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: webapp-dev
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: webapp-dev
+        image: swancrawford/webapp-dev
+        ports:
+        - containerPort: 443
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-dev-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 443
+  selector:
+    app: webapp-dev
